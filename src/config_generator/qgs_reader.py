@@ -188,7 +188,7 @@ class QGSReader:
 
         try:
             if qgs_path.startswith("postgresql://"):
-                parts = map_prefix.split("/")
+                parts = dict(map(lambda x: x.split("="), qgs_path.split("&")))
 
                 qgis_projects_db = self.db_engine.db_engine("postgresql:///?service=qgisprojects")
 
@@ -196,9 +196,9 @@ class QGSReader:
                     sql = sql_text("""
                         SELECT content FROM "{schema}"."{table}"
                         WHERE name = :project;
-                    """.format(schema=parts[1], table="qgis_projects"))
+                    """.format(schema=parts['schema'], table="qgis_projects"))
                     result = conn.execute(sql, {
-                        "project": parts[2],
+                        "project": parts['project'],
                     })
                     row = result.mappings().fetchone()
                     if not row:
