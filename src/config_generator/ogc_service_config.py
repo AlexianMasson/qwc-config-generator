@@ -44,6 +44,9 @@ class OGCServiceConfig(ServiceConfig):
         self.inherit_info_permissions = generator_config.get(
             'inherit_info_permissions', False
         )
+        self.default_map_role = generator_config.get(
+            'default_map_role', None
+        )
 
     def config(self):
         """Return service config."""
@@ -276,6 +279,23 @@ class OGCServiceConfig(ServiceConfig):
 
             map_permitted_for_role = service_name in role_permissions['maps']
             info_service_permitted_for_role = service_name in role_permissions['info_services']
+
+            if self.default_map_role:
+                map_restricted_for_public = True
+                info_service_restricted_for_public = True
+                if self.default_map_role == role:
+                    role_map_restrictions = \
+                        self.permissions_query.resource_hierarchy(
+                            self.permissions_query.resource_restrictions_query('map', self.default_map_role, session).all()
+                        )
+                    self.logger.info(role_map_restrictions)
+                    role_info_service_restrictions = \
+                        self.permissions_query.resource_hierarchy(
+                            self.permissions_query.resource_restrictions_query('info_services', self.default_map_role, session).all()
+                        )
+                    map_permitted_for_role = service_name not in role_map_restrictions
+                    info_service_permitted_for_role = service_name not in role_info_service_restrictions
+
             # If service is not restricted for public or permitted for role, allow info_service unless restricted if permissions_default_allow or inherit_info_permissions
             if (
                 self.permissions_default_allow or self.inherit_info_permissions

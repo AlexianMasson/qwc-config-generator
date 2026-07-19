@@ -434,6 +434,42 @@ class PermissionsTests(unittest.TestCase):
         self.assertEqual(len(parse("$.roles[?(@.role=='public')].permissions.wfs_services[?(@.name=='scan/wfs_test')].layers[?(@.name=='ÖV-_Haltestellen' & @.deletable==false)]").find(perm)), 1)
 
 
+    def test_default_map_role_permissions(self):
+        """ Test that default_map_role is honoured. """
+
+        # Test with no permission set => map should be permitted by the role specified in default_map_role
+        self.cursor.execute("""
+            DELETE FROM qwc_config.permissions;
+            DELETE FROM qwc_config.resources;
+        """)
+        PermissionsTests.conn.commit()
+
+        perm = self.__run_config_generator({"default_map_role": "admin"})
+
+        # Map is permitted for admin but not for public
+        self.assertEqual(len(parse("$.roles[?(@.role=='admin')].permissions.wms_services[?(@.name=='qwc_demo')]").find(perm)), 1)
+        self.assertEqual(len(parse("$.roles[?(@.role=='public')].permissions.wms_services[?(@.name=='qwc_demo')]").find(perm)), 0)
+
+        # Test with public permission set => map should be permitted by public
+        self.cursor.execute(f"""
+            DELETE FROM qwc_config.permissions;
+            DELETE FROM qwc_config.resources;
+            INSERT INTO qwc_config.resources (id, parent_id, type, name)
+            VALUES
+            (1, NULL, 'map', 'qwc_demo');
+            INSERT INTO qwc_config.permissions (id, role_id, resource_id, priority, write)
+            VALUES
+            (1, {ROLE_PUBLIC}, 1, 0, FALSE); -- permit qwc_demo map for public
+        """)
+        PermissionsTests.conn.commit()
+
+        perm = self.__run_config_generator({"default_map_role": "admin"})
+
+        # Map is permitted for admin but not for public
+        self.assertEqual(len(parse("$.roles[?(@.role=='admin')].permissions.wms_services[?(@.name=='qwc_demo')]").find(perm)), 0)
+        self.assertEqual(len(parse("$.roles[?(@.role=='public')].permissions.wms_services[?(@.name=='qwc_demo')]").find(perm)), 1)
+
+
     def test_public_permissions_default_restrict_no_permissions(self):
         """ Test permissions_default_allow=false and no permissions. """
 
