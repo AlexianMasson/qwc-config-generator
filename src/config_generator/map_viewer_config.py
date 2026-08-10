@@ -817,6 +817,7 @@ class MapViewerConfig(ServiceConfig):
             item_layer['category_sublayer'] = layer['category_sublayer']
             item_layer['queryable'] = layer['queryable']
             item_layer['styles'] = layer['styles']
+            item_layer['primary_key'] = layer.get('primary_key')
             if 'default' in item_layer['styles']:
                 item_layer['style'] = 'default'
             elif len(item_layer['styles']) > 0:

@@ -341,6 +341,11 @@ class CapabilitiesReader():
         else:
             # layer
 
+            # get primary key
+            pk_tag = layer.find('%sPrimaryKey/%sPrimaryKeyAttribute' % (np, np), ns)
+            if pk_tag is not None:
+                wms_layer['primary_key'] = pk_tag.text
+
             # collect attributes
             attributes = {}
             attrs = layer.find('%sAttributes' % np, ns)
