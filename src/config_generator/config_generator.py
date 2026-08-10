@@ -443,8 +443,9 @@ class ConfigGenerator():
                     viewer_config_plugins = {}
                     viewer_config_template_plugins = {}
                     for section in "common", "desktop", "mobile":
-                        viewer_config_plugins[section] = dict(map(lambda entry: (entry["name"], entry), viewer_config.get("plugins", {}).get(section, [])))
-                        viewer_config_template_plugins[section] = dict(map(lambda entry: (entry["name"], entry), viewer_config_template.get("plugins", {}).get(section, [])))
+                        # NOTE: append cfg.task to name to handle TaskButton plugin entries
+                        viewer_config_plugins[section] = dict(map(lambda entry: (entry["name"] + entry.get("cfg", {}).get("task", ""), entry), viewer_config.get("plugins", {}).get(section, [])))
+                        viewer_config_template_plugins[section] = dict(map(lambda entry: (entry["name"] + entry.get("cfg", {}).get("task", ""), entry), viewer_config_template.get("plugins", {}).get(section, [])))
 
                     viewer_config = deepmerge.always_merger.merge(viewer_config_template, viewer_config)
                     viewer_config["plugins"] = viewer_config.get("plugins", {})
