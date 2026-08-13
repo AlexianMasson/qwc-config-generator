@@ -367,8 +367,9 @@ class QGSReader:
                 if path and layer_map[layer_id] not in hidden_layers and \
                     geom_types[layer_id] != 'WKBNoGeometry' and geom_types[layer_id] != 'NoGeometry' \
                 :
+                    # NOTE: if a layer is not checked, it does not even appear in the visibility preset
                     result[name][path] = {
-                        "checked": layer.get('visible') == '1', "style": layer.get('style')
+                        "checked": True, "style": layer.get('style')
                     }
             for checkedGroupNode in visibilityPreset.findall('./checked-group-nodes/checked-group-node'):
                 path = group_path(checkedGroupNode.get('id'))
