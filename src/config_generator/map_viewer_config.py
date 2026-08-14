@@ -211,6 +211,9 @@ class MapViewerConfig(ServiceConfig):
             permissions['theme_info_links'] = sorted(self.permitted_resources(
                 'theme_info_link', role, session
             ).keys())
+            permissions['capabilities'] = sorted(self.permitted_resources(
+                'capabilities', role, session
+            ).keys())
             permissions['plugin_data'] = self.permitted_plugin_data_resources(
                 role, session
             )
